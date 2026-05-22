@@ -1,0 +1,24 @@
+name: 24/7 YouTube Stream
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install Tools (FFmpeg & yt-dlp)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        sudo wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp
+        sudo chmod a+rx /usr/local/bin/yt-dlp
+
+    - name: Start Re-streaming to YouTube with Auto-Restart
+      run: |
+        while true; do
+          yt-dlp -f best "https://www.youtube.com/live/u7J1LLB9izw?si=BU83zLXZ4tPGwe2h" -o - | ffmpeg -re -i - -c:v copy -c:a aac -f flv "rtmp://a.rtmp.youtube.com/live2/cv6e-9731-t2ys-kj13-9xa7"
+          echo "Stream disconnected. Reconnecting in 5 seconds..."
+          sleep 5
+        done
